@@ -23,6 +23,11 @@ if (isset($_GET['action'])) {
                 $arr = ["active" => $_GET['active']];
                 $where = "ssid='" . $_GET['ssid'] . "'";
                 $result = dbUpdate($table, $arr, $where);
+                if ($result) {
+                    // Do something
+                } else {
+                    // Do nothing
+                }
             }
 
         case '1':
@@ -46,10 +51,59 @@ if (isset($_GET['action'])) {
             }
             break;
 
-
         case '4':
             $where = " ssid='" . $_GET['ssid'] . "'";
             $result = dbDelete($table, $where);
+            if ($result) {
+                // Do something
+            } else {
+                // Do nothing
+            }
+            break;
+
+        case '5':
+            $active = 1;
+            $ordernum = 1;
+            $tmp_name = $_FILES['img']['tmp_name'];
+            $orginal_name = $_FILES['img']['name'];
+            $size = $_FILES['img']['size'];
+            $destination = "../img/slideshow";
+            $ext = strtolower(pathinfo($orginal_name, PATHINFO_EXTENSION));
+
+            if ($ext == "jpg" || $ext == "jpeg" || $ext == "gif" || $ext == "png") {
+                if (($size / 1048576) <= 3) {
+                    $img = floor(microtime(true) * 1000) . "." . $ext;
+                    // Thumbnail
+                    $sourceProperties = getimagesize($tmp_name);
+
+                    $width = $sourceProperties[0];
+                    $height = $sourceProperties[1];
+                    $imageType = $sourceProperties[2];
+                    $arr = ['title' => $_POST['title'], 'text' => $_POST['des'], 'link' => $_POST['link'], 'active' => $active, "ordernum" => $ordernum, "img" => $img];
+                    $result = dbInsert($table, $arr);
+                    if ($result) {
+                        // Do something
+                    } else {
+                        // Do nothing
+                    }
+                    if ($result) {
+                        createThumbnail($imageType, $tmp_name, $width, $height, $destination, $img, $ext);
+                        move_uploaded_file($tmp_name, $destination . $img);
+                        $error = 0;
+                        $errmsg = "A slideshow has been added successfully!";
+                    } else {
+                        $error = 1;
+                        $errmsg = "Fail to add a slideshow!";
+                    }
+                } else {
+                    $error = 1;
+                    $errmsg = "File image should not be excceed 3MB!";
+                }
+            } else {
+                $error = 1;
+                $errmsg = "Only image file is allowed to upload!";
+            }
+
             break;
 
         default:
@@ -65,7 +119,7 @@ $num = dbCount($table);
     <div class="container-fluid p-0">
 
         <h1 class="h3"><strong>SlideShow</strong></h1>
-        <a href="#" class="btn float-end " style="background-color: #222e4a; color: aliceblue; margin-top: -35px; margin-bottom: 20px;">Add New Slide</a>
+        <a href="#" class="btn float-end " data-bs-toggle="modal" data-bs-target="#slideshow" style="background-color: #222e4a; color: aliceblue; margin-top: -35px; margin-bottom: 20px;">Add New Slide</a>
         <div class="row" style="clear: both;">
             <div class="col">
                 <?php
@@ -86,7 +140,7 @@ $num = dbCount($table);
                         ?>
                             <tr>
                                 <td><?= $i ?></td>
-                                <td><img src="../img/slideshow/<?= $row['img'] ?>" alt="" style="width: 70px"></td>
+                                <td><img src="../img/slideshow/thumbnail/<?= $row['img'] ?>" alt="" style="width: 70px"></td>
                                 <td><?= $row['title'] ?></td>
                                 <td><?= substr($row['text'], 0, 50) . "...." ?></td>
                                 <td><?= $row['link'] ?></td>

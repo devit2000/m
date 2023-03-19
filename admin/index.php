@@ -1,5 +1,6 @@
 <?php
 include('../libraries/db.php');
+include('../libraries/img.php');
 $page = "dashboard.php";
 $p = "";
 if (isset($_GET['p'])) {
@@ -47,6 +48,7 @@ if (isset($_GET['p'])) {
 	</div>
 
 	<!-- script -->
+	<?php include "includes/modal.php" ?>
 	<?php include "includes/foot.php" ?>
 
 </body>
