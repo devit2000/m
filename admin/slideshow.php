@@ -50,6 +50,50 @@ if (isset($_GET['action'])) {
                 }
             }
             break;
+        case '3':
+            $active = 1;
+            $ordernum = 1;
+            $tmp_name = $_FILES['img']['tmp_name'];
+            $orginal_name = $_FILES['img']['name'];
+            $size = $_FILES['img']['size'];
+            $destination = "../img/slideshow";
+            $ext = strtolower(pathinfo($orginal_name, PATHINFO_EXTENSION));
+
+            if ($ext == "jpg" || $ext == "jpeg" || $ext == "gif" || $ext == "png") {
+                if (($size / 1048576) <= 3) {
+                    $img = floor(microtime(true) * 1000) . "." . $ext;
+                    // Thumbnail
+                    $sourceProperties = getimagesize($tmp_name);
+
+                    $width = $sourceProperties[0];
+                    $height = $sourceProperties[1];
+                    $imageType = $sourceProperties[2];
+                    $arr = ['title' => $_POST['title'], 'text' => $_POST['des'], 'link' => $_POST['link'], 'active' => $active, "ordernum" => $ordernum, "img" => $img];
+                    $result = dbUpdate($table, $arr, " ssid=" . $_GET['ssid']);
+                    if ($result) {
+                        // Do something
+                    } else {
+                        // Do nothing
+                    }
+                    if ($result) {
+                        createThumbnail($imageType, $tmp_name, $width, $height, $destination, $img, $ext);
+                        move_uploaded_file($tmp_name, $destination . $img);
+                        $error = 0;
+                        $errmsg = "A slideshow has been added successfully!";
+                    } else {
+                        $error = 1;
+                        $errmsg = "Fail to add a slideshow!";
+                    }
+                } else {
+                    $error = 1;
+                    $errmsg = "File image should not be excceed 3MB!";
+                }
+            } else {
+                $error = 1;
+                $errmsg = "Only image file is allowed to upload!";
+            }
+
+            break;
 
         case '4':
             $where = " ssid='" . $_GET['ssid'] . "'";
@@ -150,7 +194,7 @@ $num = dbCount($table);
                                     </a>
                                     <a href="index.php?p=slideshow&action=1&ssid=<?= $row['ssid'] ?>&order=<?= $row['ordernum'] ?>"><i class="align-middle text-secondary" data-feather="arrow-up"></i></a>
                                     <a href="index.php?p=slideshow&action=2&ssid=<?= $row['ssid'] ?>&order=<?= $row['ordernum'] ?>"><i class="align-middle text-secondary" data-feather="arrow-down"></i></a>
-                                    <a href="index.php?p=slideshow&action=3&ssid=<?= $row['ssid'] ?>"><i class="align-middle text-secondary" data-feather="edit"></i></a>
+                                    <a data-bs-toggle="modal" data-bs-target="#slideshow" onclick="slideshow(<?= $row['ssid'] ?>)" href="#"><i class="align-middle text-secondary" data-feather="edit"></i></a>
                                     <a href="index.php?p=slideshow&action=4&ssid=<?= $row['ssid'] ?>"><i class="align-middle text-secondary" data-feather="trash"></i></a>
                                 </td>
                             </tr>

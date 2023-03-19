@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="index.php?p=slideshow&action=5" method="post" enctype="multipart/form-data">
+                <form action="index.php?p=slideshow&action=5" id="slide" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="exampleFormControlInput1" class="form-label">Title</label>
                         <input type="title" name="title" class="form-control" id="exampleFormControlInput1" placeholder="">
@@ -36,3 +36,9 @@
         </div>
     </div>
 </div>
+<script>
+    function slideshow(id) {
+        document.getElementById('slide').action = "index.php?p=slideshow&action=3&ssid=" + id;
+
+    }
+</script>
