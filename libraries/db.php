@@ -75,6 +75,7 @@ function dbUpdate($table, $data = array(), $criteria = "")
     }
     $fv = substr($fv, 0, strlen($fv) - 1);
     $sql = "Update " . $table . " set " . $fv . " Where " . $criteria;
+    echo $sql;
     $result = mysqli_query($conn, $sql);
 
     if (!$result) {
@@ -91,7 +92,7 @@ function dbDelete($table, $criteria)
     if (empty($table) || empty($criteria)) {
         return false;
     }
-    $sql = "Delect From " . $table . " Where " . $criteria;
+    $sql = "Delete From " . $table . " Where " . $criteria;
     $conn = dbConn();
     $result = mysqli_query($conn, $sql);
 
@@ -123,4 +124,25 @@ function dbCount($table = "", $criteria = "")
     }
     dbClose($conn);
     return $num;
+}
+
+function Move($tbl, $id, $order, $operation, $orderBy)
+{
+    $conn = mysqli_connect(HOST, USER, PWD, DB);
+    $sql = "select ssid, ordernum from $tbl where ordernum $operation $order order by ordernum $orderBy limit 1";
+    echo $sql;
+    $result  = mysqli_query($conn, $sql);
+    $num = mysqli_num_rows($result);
+    echo $num;
+    if ($num > 0) {
+        $row = mysqli_fetch_array($result);
+        $new_ssid = $row['ssid'];
+        $new_order = $row['ordernum'];
+        $sql = "update $tbl set ordernum = $order where ssid=$new_ssid";
+        mysqli_query($conn, $sql);
+        $sql = "update $tbl set ordernum = $new_order where ssid=$id";
+        mysqli_query($conn, $sql);
+        return true;
+    }
+    return false;
 }

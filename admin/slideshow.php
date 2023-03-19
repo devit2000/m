@@ -1,11 +1,64 @@
 <?php
 
+/**
+ * 0: Active
+ * 1: Move Up
+ * 2: Move Down
+ * 3: Edit
+ * 4: Delete
+ * 5: Add
+ */
+
+// !!IMPORTANT!!!
 $table = "tbl_slideshow";
 $column = "*";
 $criteria = "";
-$clause = "";
+$clause = " order by ordernum ";
+if (isset($_GET['action'])) {
+    $a = $_GET['action'];
+    switch ($a) {
+            // Active
+        case '0':
+            if (isset($_GET['active'])) {
+                $arr = ["active" => $_GET['active']];
+                $where = "ssid='" . $_GET['ssid'] . "'";
+                $result = dbUpdate($table, $arr, $where);
+            }
+
+        case '1':
+            if (isset($_GET['order'])) {
+                $result = Move($table, $_GET['ssid'], $_GET['order'], "<", " desc ");
+                if ($result) {
+                    // Do something
+                } else {
+                    // Do nothing
+                }
+            }
+            break;
+        case "2":
+            if (isset($_GET['order'])) {
+                $result = Move($table, $_GET['ssid'], $_GET['order'], ">", " asc ");
+                if ($result) {
+                    // Do something
+                } else {
+                    // Do nothing
+                }
+            }
+            break;
+
+
+        case '4':
+            $where = " ssid='" . $_GET['ssid'] . "'";
+            $result = dbDelete($table, $where);
+            break;
+
+        default:
+            break;
+    }
+}
+
 $result = dbSelect($table, $column, $criteria, $clause);
-$num = mysqli_num_rows($result);
+$num = dbCount($table);
 
 ?>
 <main class="content">
@@ -38,13 +91,13 @@ $num = mysqli_num_rows($result);
                                 <td><?= substr($row['text'], 0, 50) . "...." ?></td>
                                 <td><?= $row['link'] ?></td>
                                 <td>
-                                    <a href="index.php?p=slideshow&action=0&ssid=<?= $row['ssid'] ?>&active<?= ($row['active'] == "1" ? "0" : "1") ?>">
+                                    <a href="index.php?p=slideshow&action=0&ssid=<?= $row['ssid'] ?>&active=<?= ($row['active'] == "1" ? "0" : "1") ?>">
                                         <i class="align-middle text-secondary" data-feather="<?= ($row['active'] == "1" ? "eye" : "eye-off") ?>"></i>
                                     </a>
-                                    <a href="#"><i class="align-middle text-secondary" data-feather="arrow-up"></i></a>
-                                    <a href="#"><i class="align-middle text-secondary" data-feather="arrow-down"></i></a>
-                                    <a href="#"><i class="align-middle text-secondary" data-feather="edit"></i></a>
-                                    <a href="#"><i class="align-middle text-secondary" data-feather="trash"></i></a>
+                                    <a href="index.php?p=slideshow&action=1&ssid=<?= $row['ssid'] ?>&order=<?= $row['ordernum'] ?>"><i class="align-middle text-secondary" data-feather="arrow-up"></i></a>
+                                    <a href="index.php?p=slideshow&action=2&ssid=<?= $row['ssid'] ?>&order=<?= $row['ordernum'] ?>"><i class="align-middle text-secondary" data-feather="arrow-down"></i></a>
+                                    <a href="index.php?p=slideshow&action=3&ssid=<?= $row['ssid'] ?>"><i class="align-middle text-secondary" data-feather="edit"></i></a>
+                                    <a href="index.php?p=slideshow&action=4&ssid=<?= $row['ssid'] ?>"><i class="align-middle text-secondary" data-feather="trash"></i></a>
                                 </td>
                             </tr>
                         <?php
